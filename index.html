@@ -33,8 +33,20 @@
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             font-size: 2.5em;
+        }
+
+        .last-collect-info {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .last-collect-info.active {
+            display: block;
         }
 
         .key-input-section, .main-section {
@@ -389,6 +401,8 @@
 
         <!-- Seção principal -->
         <div class="main-section" id="mainSection">
+            <div class="last-collect-info" id="lastCollectInfo"></div>
+
             <div class="date-inputs">
                 <div class="input-group">
                     <label for="dataInicio">Data/Hora Início:</label>
@@ -510,6 +524,7 @@
             document.getElementById('resultsSection').classList.remove('active');
             document.getElementById('keyInputSection').classList.add('active');
             document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('lastCollectInfo').textContent = '';
         }
 
         function formatDateForAPI(dateTimeLocal) {
@@ -531,6 +546,7 @@
             const loadingElement = document.getElementById('loading');
             const errorElement = document.getElementById('errorMessage');
             const resultsSection = document.getElementById('resultsSection');
+            const lastCollectInfo = document.getElementById('lastCollectInfo');
 
             // Validar datas
             if (!dataInicio || !dataFim) {
@@ -542,6 +558,7 @@
             // Limpar mensagens de erro anteriores
             errorElement.classList.remove('active');
             resultsSection.classList.remove('active');
+            lastCollectInfo.textContent = '';
 
             // Mostrar loading
             loadingElement.classList.add('active');
@@ -582,19 +599,57 @@
             const winnerImage = document.getElementById('winnerImage');
             const winnerLink = document.getElementById('winnerLink');
             const winnerDate = document.getElementById('winnerDate');
+            const lastCollectInfo = document.getElementById('lastCollectInfo');
 
             // Verificar se há dados
             if (!data || !data.ocorrencias || data.ocorrencias.length === 0) {
                 resultsCount.textContent = '0 pessoas encontradas';
                 resultsBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">Nenhuma ocorrência encontrada</td></tr>';
                 resultsSection.classList.add('active');
+                lastCollectInfo.textContent = '';
                 return;
             }
 
-            // Filtrar ocorrências onde publicador_nome não seja "bcranapolis"
+            // Encontrar a data de coleta mais recente
+            let ultimaColetaStr = null;
+            let ultimaColetaDate = null;
+
+            data.ocorrencias.forEach(ocorrencia => {
+                if (ocorrencia.datacoleta) {
+                    // Parsear data no formato DD/MM/YYYY HH:MM:SS
+                    const parts = ocorrencia.datacoleta.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})/);
+                    if (parts) {
+                        const dataColeta = new Date(
+                            parseInt(parts[3]), // ano
+                            parseInt(parts[2]) - 1, // mês (0-11)
+                            parseInt(parts[1]), // dia
+                            parseInt(parts[4]), // hora
+                            parseInt(parts[5]), // minuto
+                            parseInt(parts[6])  // segundo
+                        );
+
+                        if (!ultimaColetaDate || dataColeta > ultimaColetaDate) {
+                            ultimaColetaDate = dataColeta;
+                            ultimaColetaStr = ocorrencia.datacoleta;
+                        }
+                    }
+                }
+            });
+
+            // Exibir a última coleta
+            if (ultimaColetaStr) {
+                lastCollectInfo.textContent = `Último Story do Instagram coletado em: ${ultimaColetaStr}`;
+                lastCollectInfo.classList.add('active');
+            } else {
+                lastCollectInfo.textContent = '';
+            }
+
+            // Filtrar ocorrências onde publicador_nome não seja "bcranapolis" e que tenham thumbnail
             const ocorrenciasFiltradas = data.ocorrencias.filter(ocorrencia => {
                 return ocorrencia.publicador_nome &&
-                       ocorrencia.publicador_nome.toLowerCase() !== 'bcranapolis';
+                       ocorrencia.publicador_nome.toLowerCase() !== 'bcranapolis' &&
+                       ocorrencia.thumbnail &&
+                       ocorrencia.thumbnail.trim() !== '';
             });
 
             // Verificar se há ocorrências válidas após filtro
