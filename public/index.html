@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio BCR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .key-input-section, .main-section {
+            display: none;
+        }
+
+        .key-input-section.active, .main-section.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="password"],
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="password"]:focus,
+        input[type="datetime-local"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .link-button {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .link-button:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .results-count {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background: #e9ecef;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .date-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .winner-section {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+            border: 3px solid #ffa500;
+        }
+
+        .winner-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .winner-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .winner-image {
+            max-width: 300px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 4px solid white;
+        }
+
+        .winner-info {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .winner-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+
+        .winner-name a {
+            color: #764ba2;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .winner-name a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .winner-date {
+            font-size: 16px;
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            .date-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .winner-image {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Sorteio BCR</h1>
+
+        <!-- Seção de entrada da chave -->
+        <div class="key-input-section active" id="keyInputSection">
+            <div class="input-group">
+                <label for="accessKey">Digite a chave de acesso:</label>
+                <input type="password" id="accessKey" placeholder="Insira sua chave de acesso">
+            </div>
+            <button class="btn-primary" onclick="validateKey()">Confirmar</button>
+            <div class="error-message" id="keyError">Por favor, insira uma chave de acesso.</div>
+        </div>
+
+        <!-- Seção principal -->
+        <div class="main-section" id="mainSection">
+            <div class="date-inputs">
+                <div class="input-group">
+                    <label for="dataInicio">Data/Hora Início:</label>
+                    <input type="datetime-local" id="dataInicio">
+                </div>
+                <div class="input-group">
+                    <label for="dataFim">Data/Hora Fim:</label>
+                    <input type="datetime-local" id="dataFim">
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="realizarSorteio()">🎲 Sortear</button>
+            <a href="#" class="link-button" onclick="trocarChave(); return false;">🔑 Trocar chave</a>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Carregando dados...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Seção de resultados -->
+            <div class="results-section" id="resultsSection">
+                <!-- Pessoa sorteada -->
+                <div class="winner-section" id="winnerSection">
+                    <div class="winner-title">🏆 Pessoa Sorteada 🏆</div>
+                    <div class="winner-content">
+                        <img id="winnerImage" class="winner-image" src="" alt="Foto do vencedor">
+                        <div class="winner-info">
+                            <div class="winner-name">
+                                <a id="winnerLink" href="" target="_blank"></a>
+                            </div>
+                            <div class="winner-date" id="winnerDate"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Header com contagem -->
+                <div class="results-header">
+                    <div class="results-count" id="resultsCount">0 pessoas encontradas</div>
+                </div>
+
+                <!-- Tabela de participantes -->
+                <div style="overflow-x: auto;">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Publicador</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+
+        // Inicializar datas ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            setDefaultDates();
+        });
+
+        function setDefaultDates() {
+            const now = new Date();
+
+            // Data início: hoje às 00:00:00
+            const dataInicio = new Date(now);
+            dataInicio.setHours(0, 0, 0, 0);
+
+            // Data fim: hoje às 23:59:00
+            const dataFim = new Date(now);
+            dataFim.setHours(23, 59, 0, 0);
+
+            // Formatar para datetime-local (YYYY-MM-DDTHH:mm)
+            document.getElementById('dataInicio').value = formatDateTimeLocal(dataInicio);
+            document.getElementById('dataFim').value = formatDateTimeLocal(dataFim);
+        }
+
+        function formatDateTimeLocal(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function validateKey() {
+            const key = document.getElementById('accessKey').value.trim();
+            const errorElement = document.getElementById('keyError');
+
+            if (!key) {
+                errorElement.classList.add('active');
+                return;
+            }
+
+            apiKey = key;
+            errorElement.classList.remove('active');
+            document.getElementById('keyInputSection').classList.remove('active');
+            document.getElementById('mainSection').classList.add('active');
+        }
+
+        function trocarChave() {
+            apiKey = '';
+            document.getElementById('accessKey').value = '';
+            document.getElementById('mainSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('keyInputSection').classList.add('active');
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        function formatDateForAPI(dateTimeLocal) {
+            // Converter de YYYY-MM-DDTHH:mm para DD/MM/YYYY HH:mm:ss
+            const date = new Date(dateTimeLocal);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        }
+
+        async function realizarSorteio() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('errorMessage');
+            const resultsSection = document.getElementById('resultsSection');
+
+            // Validar datas
+            if (!dataInicio || !dataFim) {
+                errorElement.textContent = 'Por favor, preencha as datas de início e fim.';
+                errorElement.classList.add('active');
+                return;
+            }
+
+            // Limpar mensagens de erro anteriores
+            errorElement.classList.remove('active');
+            resultsSection.classList.remove('active');
+
+            // Mostrar loading
+            loadingElement.classList.add('active');
+
+            try {
+                // Formatar datas para o formato da API
+                const dataInicioFormatted = formatDateForAPI(dataInicio);
+                const dataFimFormatted = formatDateForAPI(dataFim);
+
+                // Construir URL
+                const url = `https://developers.vtracker.com.br/api/rest/ocorrencias/listar?monitoramentoId=894&dataInicio=${encodeURIComponent(dataInicioFormatted)}&dataFim=${encodeURIComponent(dataFimFormatted)}&key=${apiKey}`;
+
+                // Fazer requisição
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Processar resultados
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                errorElement.textContent = `Erro ao buscar dados: ${error.message}`;
+                errorElement.classList.add('active');
+            } finally {
+                loadingElement.classList.remove('active');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsCount = document.getElementById('resultsCount');
+            const resultsBody = document.getElementById('resultsBody');
+            const winnerImage = document.getElementById('winnerImage');
+            const winnerLink = document.getElementById('winnerLink');
+            const winnerDate = document.getElementById('winnerDate');
+
+            // Verificar se há dados
+            if (!data || !data.ocorrencias || data.ocorrencias.length === 0) {
+                resultsCount.textContent = '0 pessoas encontradas';
+                resultsBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">Nenhuma ocorrência encontrada</td></tr>';
+                resultsSection.classList.add('active');
+                return;
+            }
+
+            // Filtrar ocorrências onde publicador_nome não seja "bcranapolis"
+            const ocorrenciasFiltradas = data.ocorrencias.filter(ocorrencia => {
+                return ocorrencia.publicador_nome &&
+                       ocorrencia.publicador_nome.toLowerCase() !== 'bcranapolis';
+            });
+
+            // Verificar se há ocorrências válidas após filtro
+            if (ocorrenciasFiltradas.length === 0) {
+                resultsCount.textContent = '0 pessoas encontradas';
+                resultsBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">Nenhuma ocorrência válida encontrada</td></tr>';
+                resultsSection.classList.add('active');
+                return;
+            }
+
+            // Sortear uma pessoa aleatoriamente
+            const randomIndex = Math.floor(Math.random() * ocorrenciasFiltradas.length);
+            const vencedor = ocorrenciasFiltradas[randomIndex];
+
+            // Exibir vencedor
+            winnerImage.src = vencedor.thumbnail || '';
+            winnerImage.alt = vencedor.publicador_nome || 'Vencedor';
+            winnerLink.href = vencedor.publicador_link || '#';
+            winnerLink.textContent = vencedor.publicador_nome || '-';
+            winnerDate.textContent = vencedor.data || '-';
+
+            // Atualizar contagem
+            resultsCount.textContent = `${ocorrenciasFiltradas.length} ${ocorrenciasFiltradas.length === 1 ? 'pessoa encontrada' : 'pessoas encontradas'}`;
+
+            // Limpar tabela
+            resultsBody.innerHTML = '';
+
+            // Preencher tabela com todos os participantes
+            ocorrenciasFiltradas.forEach(ocorrencia => {
+                const row = document.createElement('tr');
+                const publicadorNome = ocorrencia.publicador_nome || '-';
+                const publicadorLink = ocorrencia.publicador_link || '#';
+                const data = ocorrencia.data || '-';
+
+                row.innerHTML = `
+                    <td><a href="${publicadorLink}" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 600;">${publicadorNome}</a></td>
+                    <td>${data}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+
+            resultsSection.classList.add('active');
+        }
+    </script>
+</body>
+</html>
