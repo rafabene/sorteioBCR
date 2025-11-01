@@ -560,6 +560,16 @@
             resultsSection.classList.remove('active');
             lastCollectInfo.textContent = '';
 
+            // Limpar pessoa sorteada anteriormente
+            const winnerImage = document.getElementById('winnerImage');
+            const winnerLink = document.getElementById('winnerLink');
+            const winnerDate = document.getElementById('winnerDate');
+            winnerImage.src = '';
+            winnerImage.alt = '';
+            winnerLink.href = '#';
+            winnerLink.textContent = '';
+            winnerDate.textContent = '';
+
             // Mostrar loading
             loadingElement.classList.add('active');
 
