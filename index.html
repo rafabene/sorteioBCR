@@ -711,13 +711,13 @@
                 lastCollectInfo.textContent = '';
             }
 
-            // Filtrar ocorrências onde publicador_nome não seja "bcranapolis", que tenham thumbnail e servico_id seja 83
+            // Filtrar ocorrências onde publicador_nome não seja "bcranapolis", que tenham thumbnail e servico_id seja 101
             const ocorrenciasFiltradas = data.ocorrencias.filter(ocorrencia => {
                 return ocorrencia.publicador_nome &&
                        ocorrencia.publicador_nome.toLowerCase() !== 'bcranapolis' &&
                        ocorrencia.thumbnail &&
                        ocorrencia.thumbnail.trim() !== '' &&
-                       ocorrencia.servico_id === 83;
+                       ocorrencia.servico_id === '101';
             });
 
             // Verificar se há ocorrências válidas após filtro
